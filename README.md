@@ -1,2 +1,2 @@
 # console-ascii
-print an image or text by ascii in browser
+在浏览器控制台输出一段文字或一个图片的字符画。
