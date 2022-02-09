@@ -1,6 +1,6 @@
 {
   "name": "console-ascii",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "print an image or text by ascii in browser",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
