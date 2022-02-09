@@ -24,7 +24,7 @@ class ConsoleASCII {
     constructor(option: Option) {
         this.canvas = document.createElement('canvas');
         this.option = {...option};
-        this.chartSet = option.chartSet || [' ', '.', '-', '#', 'o', '@'];
+        this.chartSet = option.chartSet || [' ', '.', '-', '#', 'o', '@', '▆', '▇', '█'];
         if (this.option.type === 'image') {
             this.#initImage()
         }
@@ -94,17 +94,16 @@ class ConsoleASCII {
     #gridCheck() {
         const scale = 'scale' in this.option ? this.option.scale || 1 : 1;
         this.gridCell = Math.max(
-            Math.ceil(this.canvas.width / scale / 300),
-            Math.ceil(this.canvas.height / scale / 300),
+            Math.ceil(this.canvas.width / scale / 1000),
+            Math.ceil(this.canvas.height / scale / 1000),
             2
         );
         
         const horizontal= Math.ceil(this.canvas.width / this.gridCell);
         const vertical = Math.ceil(this.canvas.height / this.gridCell);
         this.gridSide = [horizontal - 1, vertical - 1];
-        // this.grid = new GridArray(vertical, horizontal, (this.chartSet.length - 1).toString(2).length);
-        
-        this.gridBeta = new Array(vertical).fill(null).map(() => new Array(horizontal).fill(0));
+        this.grid = new GridArray(vertical, horizontal, (this.chartSet.length - 1).toString(2).length);
+        // this.gridBeta = new Array(vertical).fill(null).map(() => new Array(horizontal).fill(0));
         const ctx = this.canvas.getContext('2d');
         const pixel = ctx!.getImageData(0, 0, horizontal * this.gridCell, vertical * this.gridCell).data;
 
@@ -120,18 +119,30 @@ class ConsoleASCII {
                             break singleGridLoop;
                         }
                         const pixelIndex = offsetY * horizontal * this.gridCell + offsetX;
+
+                        // 亮度
                         const {l} = rgb2Hsl([
                             pixel[pixelIndex * 4 + 0],
                             pixel[pixelIndex * 4 + 1],
                             pixel[pixelIndex * 4 + 2],
                         ]);
+
+                        // rgb平均
+                        // const l = (pixel[pixelIndex * 4 + 0]
+                        //     + pixel[pixelIndex * 4 + 1]
+                        //     + pixel[pixelIndex * 4 + 2])
+                        //     / (3 * (Math.pow(2, 8) - 1));
+
+                        // 加权平均
+                        // const l = (0.299 * pixel[pixelIndex * 4 + 0] + 0.587 * pixel[pixelIndex * 4 + 1] + 0.114 * pixel[pixelIndex * 4 + 2])
+                        //     / (Math.pow(2, 8) - 1);
                         lightList.push(l);
                     }
                 }
                 const avgL = lightList.reduce((pre, now) => pre + now) / lightList.length;
                 
-                // this.grid.setPoint({x: gridX, y: gridY}, this.chartSet.length - 1 - Math.round(avgL * (this.chartSet.length - 1)));
-                this.gridBeta[gridY][gridX] = this.chartSet.length - 1 - Math.round(avgL * (this.chartSet.length - 1));
+                this.grid.setPoint({x: gridX, y: gridY}, this.chartSet.length - 1 - Math.round(avgL * (this.chartSet.length - 1)));
+                // this.gridBeta[gridY][gridX] = this.chartSet.length - 1 - Math.round(avgL * (this.chartSet.length - 1));
             }
         }
         if (typeof this.onload === 'function') {
@@ -142,19 +153,19 @@ class ConsoleASCII {
     toString() {
         let str = '';
         let row = 0;
-        // this.grid.forEach((value, x, y) => {
-        //     if (y !== row) {
-        //         str += '\n';
-        //         row = y
-        //     }
-        //     str += this.chartSet[value];
-        // });
-        this.gridBeta.forEach(list => {
-            list.forEach(value => {
-                str += this.chartSet[value];
-            })
-            str += '\n';
+        this.grid.forEach((value, x, y) => {
+            if (y !== row) {
+                str += '\n';
+                row = y
+            }
+            str += this.chartSet[value];
         });
+        // this.gridBeta.forEach(list => {
+        //     list.forEach(value => {
+        //         str += this.chartSet[value];
+        //     })
+        //     str += '\n';
+        // });
         return str;
     }
 

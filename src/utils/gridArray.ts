@@ -63,7 +63,7 @@ export class GridArray {
         let orginBin = '';
         for (let i = offset.count; i < this.buffer.length; i++) {
             orginBin += dec2bin(this.buffer[i]);
-            if (orginBin.length >= 2 * this.length) {
+            if (orginBin.length >= offset.i + this.length) {
                 break;
             }
         }
@@ -86,7 +86,7 @@ export class GridArray {
         let bin = ''
         for (let i = offset.count; i < this.buffer.length; i++) {
             bin += dec2bin(this.buffer[i]);
-            if (bin.length >= 2 * this.length) {
+            if (bin.length >= offset.i + this.length) {
                 break;
             }
         }
